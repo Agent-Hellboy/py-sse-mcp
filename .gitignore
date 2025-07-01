@@ -1,1 +1,11 @@
-__pycache__/
+*__pycache__/
+
+explore
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.cursor/
+.cursor/mcp.json
+.cursor/mcp.json
