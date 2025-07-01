@@ -12,11 +12,11 @@ class ToolRegistry:
         input_schema = {"type": "object", "properties": {}, "required": []}
         for param, value in sig.parameters.items():
             typ = value.annotation
-            if typ == int or typ == float:
+            if typ is int or typ is float:
                 typ_str = "number"
-            elif typ == str:
+            elif typ is str:
                 typ_str = "string"
-            elif typ == bool:
+            elif typ is bool:
                 typ_str = "boolean"
             else:
                 typ_str = "string"
