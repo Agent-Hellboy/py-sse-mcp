@@ -1,7 +1,11 @@
 # py-sse-mcp
 
+[![Build Status](https://github.com/Agent-Hellboy/py-sse-mcp/actions/workflows/python-ci.yml/badge.svg)](https://github.com/Agent-Hellboy/py-sse-mcp/actions/workflows/python-ci.yml)
+[![codecov](https://codecov.io/gh/Agent-Hellboy/py-sse-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/Agent-Hellboy/py-sse-mcp)
 
 A Simple Framework for Creating an MCP Server using sse protocol
+
+
 
 **Note:** Tested only with Cursor.
 
