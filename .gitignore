@@ -9,3 +9,4 @@ explore
 .cursor/
 .cursor/mcp.json
 .cursor/mcp.json
+.tox/
