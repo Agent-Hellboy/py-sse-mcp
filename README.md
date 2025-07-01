@@ -7,12 +7,7 @@ A Simple Framework for Creating an MCP Server using sse protocol
 
 ## Usage
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. Run the example server:
+Run the example server:
    ```bash
    pip install .
    python example/run_server.py
