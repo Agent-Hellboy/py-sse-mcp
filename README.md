@@ -5,6 +5,9 @@
 
 A Simple Framework for Creating an MCP Server using sse protocol
 
+
+This project was created after encountering several issues with **sse transport protocol** [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk). The basic setup was inspired by [b3nelof0n/node-mcp-server](https://github.com/b3nelof0n/node-mcp-server/blob/main/server.js).
+
 ## Usage
 
 Run the example server:
@@ -13,9 +16,8 @@ Run the example server:
    python example/run_server.py
    ```
 
-**Note:** Tested only with Cursor.
+**Note:** Targeting Cursor as a client only.
 
-This project was created after encountering several issues with **sse transport protocol** [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk). The basic setup was inspired by [b3nelof0n/node-mcp-server](https://github.com/b3nelof0n/node-mcp-server/blob/main/server.js).
 
 Request flow of an example mcp server 
 ![mcp](./mcp.png)
