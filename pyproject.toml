@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-sse-mcp"
+version = "0.1.0"
+description = "A Simple Framework for Creating an MCP Server using SSE protocol"
+authors = [
+    { name = "Prince Roshan", email = "princekrroshan01@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "requests"
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/Agent-Hellboy/py-sse-mcp" 
