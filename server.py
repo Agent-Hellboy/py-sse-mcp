@@ -18,6 +18,7 @@ import json
 from typing import Dict, Any
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+from tools import TOOLS_REGISTRY
 
 app = FastAPI(middleware=[Middleware(CORSMiddleware, allow_origins=["*"])])
 
@@ -62,6 +63,7 @@ async def sse_cursor(request: Request):
 
             try:
                 msg = await asyncio.wait_for(queue.get(), timeout=10)
+                print(f"[QUEUE] Streaming message from queue for session {session_id}: {msg}")
                 yield f"event: message\ndata: {msg}\n\n"
             except asyncio.TimeoutError:
                 yield f"event: heartbeat\ndata: {int(asyncio.get_event_loop().time())}\n\n"
@@ -112,47 +114,66 @@ async def handle_rpc_method(method: str, data: dict, session_id: str, rpc_id: An
                 "serverInfo": {"name": "final-capabilities-server", "version": "1.0.0"}
             }
         }
+        print(f"[QUEUE] Putting message into queue for session {session_id}: {result}")
         await queue.put(json.dumps(result))
 
     elif method == "tools/list":
+        # Dynamically generate tools list from registry
+        tools_list = []
+        for tool_name, tool_info in TOOLS_REGISTRY.items():
+            tools_list.append({
+                "name": tool_name,
+                "description": tool_info["description"],
+                "inputSchema": tool_info["inputSchema"]
+            })
+        
         result = {
             "jsonrpc": "2.0",
             "id": rpc_id,
             "result": {
-                "tools": [{
-                    "name": "addNumbersTool",
-                    "description": "Adds two numbers 'a' and 'b' and returns their sum.",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "a": {"type": "number"},
-                            "b": {"type": "number"}
-                        },
-                        "required": ["a", "b"]
-                    }
-                }],
-                "count": 1
+                "tools": tools_list,
+                "count": len(tools_list)
             }
         }
+        print(f"[QUEUE] Putting message into queue for session {session_id}: {result}")
         await queue.put(json.dumps(result))
 
     elif method == "tools/call":
         tool_name = data.get("params", {}).get("name")
         args = data.get("params", {}).get("arguments", {})
-        if tool_name == "addNumbersTool":
-            a = args.get("a", 0)
-            b = args.get("b", 0)
-            sum_result = {
-                "jsonrpc": "2.0",
-                "id": rpc_id,
-                "result": {
-                    "content": [{
-                        "type": "text",
-                        "text": f"Sum of {a} + {b} = {a + b}"
-                    }]
+        
+        if tool_name in TOOLS_REGISTRY:
+            try:
+                # Get the tool function and call it with the provided arguments
+                tool_info = TOOLS_REGISTRY[tool_name]
+                tool_function = tool_info["function"]
+                
+                # Call the tool function with unpacked arguments
+                result_text = tool_function(**args)
+                
+                success_result = {
+                    "jsonrpc": "2.0",
+                    "id": rpc_id,
+                    "result": {
+                        "content": [{
+                            "type": "text",
+                            "text": result_text
+                        }]
+                    }
                 }
-            }
-            await queue.put(json.dumps(sum_result))
+                print(f"[QUEUE] Putting message into queue for session {session_id}: {success_result}")
+                await queue.put(json.dumps(success_result))
+            except Exception as e:
+                error = {
+                    "jsonrpc": "2.0",
+                    "id": rpc_id,
+                    "error": {
+                        "code": -32603,
+                        "message": f"Error executing tool '{tool_name}': {str(e)}"
+                    }
+                }
+                print(f"[QUEUE] Putting message into queue for session {session_id}: {error}")
+                await queue.put(json.dumps(error))
         else:
             error = {
                 "jsonrpc": "2.0",
@@ -162,6 +183,7 @@ async def handle_rpc_method(method: str, data: dict, session_id: str, rpc_id: An
                     "message": f"No such tool '{tool_name}'"
                 }
             }
+            print(f"[QUEUE] Putting message into queue for session {session_id}: {error}")
             await queue.put(json.dumps(error))
 
     elif method == "notifications/initialized":
@@ -177,8 +199,9 @@ async def handle_rpc_method(method: str, data: dict, session_id: str, rpc_id: An
                 "message": f"Method '{method}' not recognized"
             }
         }
+        print(f"[QUEUE] Putting message into queue for session {session_id}: {error}")
         await queue.put(json.dumps(error))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8008)
+    uvicorn.run(app, host="0.0.0.0", port=8088)
