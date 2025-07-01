@@ -39,3 +39,9 @@ jobs:
           pip install tox
       - name: Lint with tox
         run: tox -e lint 
+        
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Agent-Hellboy/py-sse-mcp
