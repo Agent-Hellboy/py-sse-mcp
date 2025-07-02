@@ -1,12 +1,14 @@
 import asyncio
 import json
+import os
 from uuid import uuid4
+from typing import List, Dict
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from .registry import tool_registry
+from .registry import tool_registry, resource_registry
 
 app = FastAPI()
 
@@ -183,6 +185,32 @@ async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
                 "error": {"code": -32601, "message": f"No such tool '{tool_name}'"},
             }
             await queue.put(json.dumps(error))
+    elif method == "resources/list":
+        resources = resource_registry.list_resources()
+        result = {
+            "jsonrpc": "2.0",
+            "id": rpc_id,
+            "result": {"resources": resources}
+        }
+        await queue.put(json.dumps(result))
+        return JSONResponse(content=result)
+    elif method == "resources/read":
+        uri = data.get("params", {}).get("uri")
+        try:
+            content = resource_registry.read_resource(uri)
+            result = {
+                "jsonrpc": "2.0",
+                "id": rpc_id,
+                "result": {"contents": [content]}
+            }
+        except Exception as e:
+            result = {
+                "jsonrpc": "2.0",
+                "id": rpc_id,
+                "error": {"code": -32602, "message": str(e)}
+            }
+        await queue.put(json.dumps(result))
+        return JSONResponse(content=result)
     else:
         error = {
             "jsonrpc": "2.0",
