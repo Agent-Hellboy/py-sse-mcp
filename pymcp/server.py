@@ -1,8 +1,6 @@
 import asyncio
 import json
-import os
 from uuid import uuid4
-from typing import List, Dict
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
