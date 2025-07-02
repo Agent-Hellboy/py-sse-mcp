@@ -187,27 +187,19 @@ async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
             await queue.put(json.dumps(error))
     elif method == "resources/list":
         resources = resource_registry.list_resources()
-        result = {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "result": {"resources": resources}
-        }
+        result = {"jsonrpc": "2.0", "id": rpc_id, "result": {"resources": resources}}
         await queue.put(json.dumps(result))
         return JSONResponse(content=result)
     elif method == "resources/read":
         uri = data.get("params", {}).get("uri")
         try:
             content = resource_registry.read_resource(uri)
-            result = {
-                "jsonrpc": "2.0",
-                "id": rpc_id,
-                "result": {"contents": [content]}
-            }
+            result = {"jsonrpc": "2.0", "id": rpc_id, "result": {"contents": [content]}}
         except Exception as e:
             result = {
                 "jsonrpc": "2.0",
                 "id": rpc_id,
-                "error": {"code": -32602, "message": str(e)}
+                "error": {"code": -32602, "message": str(e)},
             }
         await queue.put(json.dumps(result))
         return JSONResponse(content=result)

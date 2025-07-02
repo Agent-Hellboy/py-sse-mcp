@@ -44,54 +44,55 @@ class ResourceRegistry:
 
     def resource(self, uri, name, description=None, mimeType=None):
         def decorator(func):
-            self._resources.append({
-                "uri": uri,
-                "name": name,
-                "description": description,
-                "mimeType": mimeType,
-                "size": None,
-                "func": func,
-                "path": None
-            })
+            self._resources.append(
+                {
+                    "uri": uri,
+                    "name": name,
+                    "description": description,
+                    "mimeType": mimeType,
+                    "size": None,
+                    "func": func,
+                    "path": None,
+                }
+            )
             return func
+
         return decorator
 
     def list_resources(self):
         import os
+
         resources = []
         for res in self._resources:
             # Optionally update size for file-based resources
             if res.get("path") and res["path"] and os.path.exists(res["path"]):
                 res["size"] = os.path.getsize(res["path"])
-            resources.append({k: v for k, v in res.items() if k not in ("path", "func")})
+            resources.append(
+                {k: v for k, v in res.items() if k not in ("path", "func")}
+            )
         return resources
 
     def read_resource(self, uri):
         import os
+
         for res in self._resources:
             if res["uri"] == uri:
                 if res.get("func"):
                     # Call the function to get the resource content
                     content = res["func"]()
-                    return {
-                        "uri": uri,
-                        "mimeType": res["mimeType"],
-                        "text": content
-                    }
+                    return {"uri": uri, "mimeType": res["mimeType"], "text": content}
                 elif res.get("path") and res["path"] and os.path.exists(res["path"]):
                     with open(res["path"], "r", encoding="utf-8") as f:
                         text = f.read()
-                    return {
-                        "uri": uri,
-                        "mimeType": res["mimeType"],
-                        "text": text
-                    }
+                    return {"uri": uri, "mimeType": res["mimeType"], "text": text}
                 else:
-                    raise FileNotFoundError(f"Resource not found: {res.get('path', uri)}")
+                    raise FileNotFoundError(
+                        f"Resource not found: {res.get('path', uri)}"
+                    )
         raise ValueError("Resource not found")
 
     def register(self, *args, **kwargs):
         return self.add_resource(*args, **kwargs)
 
-resource_registry = ResourceRegistry()
 
+resource_registry = ResourceRegistry()
