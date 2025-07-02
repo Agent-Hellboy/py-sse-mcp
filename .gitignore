@@ -10,3 +10,4 @@ explore
 .cursor/mcp.json
 .cursor/mcp.json
 .tox/
+py_sse_mcp.egg-info/

@@ -51,6 +51,12 @@ def calculateAreaTool(length: float, width: float) -> str:
     return f"Area of rectangle with length {length} and width {width} = {area}"
 
 
+@tool_registry.register
+def promptEchoTool(prompt: str) -> str:
+    """Echoes back the prompt provided."""
+    return f"You said: {prompt}"
+
+
 def test_root():
     resp = requests.get(f"{BASE_URL}/")
     assert resp.status_code == 200
@@ -114,3 +120,44 @@ def test_full_flow():
     assert resp.status_code == 200
     assert "content" in resp.json()["result"]
     assert resp.json()["result"]["content"][0]["text"] == "Sum of 2 + 3 = 5"
+
+
+def test_tools_list_includes_prompt():
+    resp = requests.get(f"{BASE_URL}/sse-cursor", stream=True, timeout=5)
+    session_id = None
+    for line in resp.iter_lines():
+        if line:
+            decoded = line.decode()
+            if decoded.startswith("data: /message?sessionId="):
+                session_id = decoded.split("=")[-1]
+                break
+    assert session_id
+    payload = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+    resp = requests.post(f"{BASE_URL}/message?sessionId={session_id}", json=payload)
+    assert resp.status_code == 200
+    tools = resp.json()["result"].get("tools", [])
+    for tool in tools:
+        if tool["name"] == "promptEchoTool":
+            assert tool["prompt"] is True
+
+
+def test_prompt_echo_tool():
+    resp = requests.get(f"{BASE_URL}/sse-cursor", stream=True, timeout=5)
+    session_id = None
+    for line in resp.iter_lines():
+        if line:
+            decoded = line.decode()
+            if decoded.startswith("data: /message?sessionId="):
+                session_id = decoded.split("=")[-1]
+                break
+    assert session_id
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "method": "tools/call",
+        "params": {"name": "promptEchoTool", "arguments": {"prompt": "Hello!"}},
+    }
+    resp = requests.post(f"{BASE_URL}/message?sessionId={session_id}", json=payload)
+    assert resp.status_code == 200
+    result = resp.json()["result"]["content"][0]["text"]
+    assert result == "You said: Hello!"

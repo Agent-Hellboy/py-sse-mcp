@@ -141,6 +141,7 @@ async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
                     "name": tool_name,
                     "description": tool_info["description"],
                     "inputSchema": tool_info["inputSchema"],
+                    "prompt": tool_info.get("prompt", False),
                 }
             )
         result = {

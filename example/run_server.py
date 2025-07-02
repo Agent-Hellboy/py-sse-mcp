@@ -27,7 +27,15 @@ def calculateAreaTool(length: float, width: float) -> str:
     return f"Area of rectangle with length {length} and width {width} = {area}"
 
 
+@tool_registry.register
+def promptEchoTool(prompt: str) -> str:
+    """Echoes back the prompt provided, with input validation."""
+    if not prompt or "crash" in prompt.lower():
+        return "Invalid input. Please try again."
+    return f"You said: {prompt}"
+
+
+
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8088)

@@ -22,10 +22,12 @@ class ToolRegistry:
                 typ_str = "string"
             input_schema["properties"][param] = {"type": typ_str}
             input_schema["required"].append(param)
+        has_prompt = "prompt" in sig.parameters
         self._tools[name] = {
             "function": func,
             "description": doc,
             "inputSchema": input_schema,
+            "prompt": has_prompt,
         }
         return func
 
