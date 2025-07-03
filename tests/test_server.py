@@ -11,7 +11,7 @@ from threading import Thread
 import uvicorn
 
 from pymcp.registry import tool_registry
-from pymcp.server import app
+from pymcp.applications import create_app
 
 BASE_URL = "http://127.0.0.1:8088"
 
@@ -21,7 +21,7 @@ def start_server():
     # Start the server in a background thread
     server = Thread(
         target=uvicorn.run,
-        args=(app,),
+        args=(create_app(middleware_config=None),),
         kwargs={"host": "127.0.0.1", "port": 8088},
         daemon=True,
     )
