@@ -54,7 +54,7 @@ def setup_middleware(app, config: MiddlewareConfig):
         app.add_middleware(GZipMiddleware)
     # Custom middleware
     for mw in config.custom:
-        if not hasattr(mw, "__call__"):
+        if not callable(mw):
             raise ValueError(f"Custom middleware {mw} is not callable")
         app.add_middleware(mw)
     # Error handling can be added here as needed
