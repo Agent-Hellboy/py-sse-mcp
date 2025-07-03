@@ -84,6 +84,48 @@ logging.basicConfig(level=logging.DEBUG)  # or INFO, WARNING, etc.
 
 This allows you to control the verbosity and destination of log messages from both your code and the framework.
 
+## Middleware Configuration
+
+You can now configure middleware for your MCP server using a dedicated `config.py` file and the `MiddlewareConfig` class. This allows you to easily customize CORS, logging, compression, and add your own middleware.
+
+### Example: config.py
+
+```python
+from pymcp.server import MiddlewareConfig
+
+middleware_config = MiddlewareConfig(
+    cors={
+        "allow_origins": ["https://myapp.com"],
+        "allow_methods": ["GET", "POST"],
+        "allow_headers": ["*"],
+        "allow_credentials": True,
+    },
+    logging={
+        "level": "DEBUG",
+        "format": "%(asctime)s %(levelname)s %(message)s",
+    },
+    compression={
+        "enabled": True
+    },
+    custom=[
+        # Add custom middleware classes here if needed
+    ]
+)
+```
+
+### Example: run_server.py
+
+```python
+from example.config import middleware_config
+from pymcp.server import create_app
+
+app = create_app(middleware_config=middleware_config)
+```
+
+This approach keeps your configuration clean and separated from your application logic.
+
+For more details and advanced configuration options, see [guide.md](./guide.md).
+
 
 
 
