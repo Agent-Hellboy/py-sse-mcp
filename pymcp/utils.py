@@ -45,40 +45,4 @@ async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
         logging.debug(f"[TOOLS] Tool names: {[t['name'] for t in tools_list]}")
         logging.debug(f"[TOOLS] Tool schemas: {json.dumps(tools_list, indent=2)}")
         await queue.put(json.dumps(result))
-    elif method == "tools/call":
-        tool_name = data.get("params", {}).get("name")
-        args = data.get("params", {}).get("arguments", {})
-        tools = tool_registry.get_tools()
-        if tool_name in tools:
-            try:
-                result_text = tools[tool_name]["function"](**args)
-                success_result = {
-                    "jsonrpc": "2.0",
-                    "id": rpc_id,
-                    "result": {"content": [{"type": "text", "text": result_text}]},
-                }
-                await queue.put(json.dumps(success_result))
-            except Exception as e:
-                error = {
-                    "jsonrpc": "2.0",
-                    "id": rpc_id,
-                    "error": {
-                        "code": -32603,
-                        "message": f"Error executing tool '{tool_name}': {str(e)}",
-                    },
-                }
-                await queue.put(json.dumps(error))
-        else:
-            error = {
-                "jsonrpc": "2.0",
-                "id": rpc_id,
-                "error": {"code": -32601, "message": f"No such tool '{tool_name}'"},
-            }
-            await queue.put(json.dumps(error))
-    else:
-        error = {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "error": {"code": -32601, "message": f"Method '{method}' not recognized"},
-        }
-        await queue.put(json.dumps(error))
+
