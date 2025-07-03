@@ -13,6 +13,7 @@ import uvicorn
 from pymcp.registry import tool_registry
 from pymcp.applications import create_app
 
+
 BASE_URL = "http://127.0.0.1:8088"
 
 
@@ -161,3 +162,6 @@ def test_prompt_echo_tool():
     assert resp.status_code == 200
     result = resp.json()["result"]["content"][0]["text"]
     assert result == "You said: Hello!"
+
+
+
