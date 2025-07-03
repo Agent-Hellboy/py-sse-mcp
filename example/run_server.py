@@ -1,6 +1,9 @@
+import logging
+
 from pymcp.registry import tool_registry
 from pymcp.server import app
 
+logging.basicConfig(level=logging.DEBUG)
 
 @tool_registry.register
 def addNumbersTool(a: float, b: float) -> str:
