@@ -7,11 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
-<<<<<<< Updated upstream
 from .registry import tool_registry
-=======
-from .registry import resource_registry, tool_registry
->>>>>>> Stashed changes
 
 app = FastAPI()
 
