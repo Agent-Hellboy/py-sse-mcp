@@ -1,23 +1,19 @@
+"""
+Main server logic for the MCP framework.
+"""
+
 import asyncio
 import json
 import logging
 from uuid import uuid4
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .registry import tool_registry
+from .utils import handle_rpc_method
 
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 
 def get_sessions(app):
@@ -26,13 +22,14 @@ def get_sessions(app):
     return app.state.sessions
 
 
-@app.get("/")
+@router.get("/")
 async def root():
     return {"status": "ok"}
 
 
-@app.get("/sse-cursor")
+@router.get("/sse-cursor")
 async def sse_cursor(request: Request):
+    app = request.app
     session_id = str(uuid4())
     logging.debug("[MCP] SSE => /sse-cursor connected")
     logging.debug(f"[MCP] Created sessionId: {session_id}")
@@ -55,8 +52,9 @@ async def sse_cursor(request: Request):
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
-@app.post("/message")
+@router.post("/message")
 async def message(request: Request):
+    app = request.app
     session_id = request.query_params.get("sessionId")
     sessions = get_sessions(app)
     if not session_id or session_id not in sessions:
@@ -118,76 +116,3 @@ async def message(request: Request):
     ack = {"jsonrpc": "2.0", "id": rpc_id, "result": {"ack": f"Received {method}"}}
     await handle_rpc_method(method, data, session_id, rpc_id, sessions)
     return JSONResponse(content=ack)
-
-
-async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
-    queue = sessions[session_id]["queue"]
-    if method == "initialize":
-        sessions[session_id]["initialized"] = True
-        result = {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "result": {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {"tools": {"listChanged": True}},
-                "serverInfo": {"name": "mcpframework", "version": "1.0.0"},
-            },
-        }
-        await queue.put(json.dumps(result))
-    elif method == "tools/list":
-        tools_list = []
-        for tool_name, tool_info in tool_registry.get_tools().items():
-            tools_list.append(
-                {
-                    "name": tool_name,
-                    "description": tool_info["description"],
-                    "inputSchema": tool_info["inputSchema"],
-                    "prompt": tool_info.get("prompt", False),
-                }
-            )
-        result = {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "result": {"tools": tools_list, "count": len(tools_list)},
-        }
-        logging.debug(f"[TOOLS] Sending {len(tools_list)} tools to Cursor")
-        logging.debug(f"[TOOLS] Tool names: {[t['name'] for t in tools_list]}")
-        logging.debug(f"[TOOLS] Tool schemas: {json.dumps(tools_list, indent=2)}")
-        await queue.put(json.dumps(result))
-    elif method == "tools/call":
-        tool_name = data.get("params", {}).get("name")
-        args = data.get("params", {}).get("arguments", {})
-        tools = tool_registry.get_tools()
-        if tool_name in tools:
-            try:
-                result_text = tools[tool_name]["function"](**args)
-                success_result = {
-                    "jsonrpc": "2.0",
-                    "id": rpc_id,
-                    "result": {"content": [{"type": "text", "text": result_text}]},
-                }
-                await queue.put(json.dumps(success_result))
-            except Exception as e:
-                error = {
-                    "jsonrpc": "2.0",
-                    "id": rpc_id,
-                    "error": {
-                        "code": -32603,
-                        "message": f"Error executing tool '{tool_name}': {str(e)}",
-                    },
-                }
-                await queue.put(json.dumps(error))
-        else:
-            error = {
-                "jsonrpc": "2.0",
-                "id": rpc_id,
-                "error": {"code": -32601, "message": f"No such tool '{tool_name}'"},
-            }
-            await queue.put(json.dumps(error))
-    else:
-        error = {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "error": {"code": -32601, "message": f"Method '{method}' not recognized"},
-        }
-        await queue.put(json.dumps(error))

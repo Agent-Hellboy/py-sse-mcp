@@ -1,7 +1,7 @@
 import requests
 
+from pymcp.applications import create_app
 from pymcp.registry import tool_registry
-from pymcp.server import app
 
 
 @tool_registry.register
@@ -22,4 +22,4 @@ if __name__ == "__main__":
     print(
         "[INFO] Make sure to start the Flask API server (flask_api_server.py) before running this example."
     )
-    uvicorn.run(app, host="0.0.0.0", port=8088)
+    uvicorn.run(create_app(middleware_config=None), host="0.0.0.0", port=8088)

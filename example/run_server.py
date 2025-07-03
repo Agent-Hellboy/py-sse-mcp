@@ -1,9 +1,11 @@
 import logging
 
+from config import middleware_config
+from pymcp.applications import create_app
 from pymcp.registry import tool_registry
-from pymcp.server import app
 
 logging.basicConfig(level=logging.DEBUG)
+
 
 @tool_registry.register
 def addNumbersTool(a: float, b: float) -> str:
@@ -38,7 +40,8 @@ def promptEchoTool(prompt: str) -> str:
     return f"You said: {prompt}"
 
 
-
 if __name__ == "__main__":
     import uvicorn
+
+    app = create_app(middleware_config=middleware_config)
     uvicorn.run(app, host="0.0.0.0", port=8088)
