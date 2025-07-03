@@ -64,7 +64,7 @@ async def message(request: Request):
             status_code=404, content={"error": "Invalid or missing sessionId"}
         )
     data = await request.json()
-    logging.debug(f"[MCP] POST /message => body: {data} query: {session_id}")
+    logging.debug(f"[MCP] POST /message => method: {data.get('method', 'unknown')} query: {session_id}")
     rpc_id = data.get("id")
     method = data.get("method")
     queue = sessions[session_id]["queue"]
