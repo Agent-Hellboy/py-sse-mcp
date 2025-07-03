@@ -10,15 +10,6 @@ This project was created after encountering several issues(I faced it while tryi
 
 ## Usage
 
-To see detailed debug logs from the framework, configure logging in your application before importing or running the server:
-
-```python
-import logging
-logging.basicConfig(level=logging.DEBUG)
-```
-
-
-
 Run the example server:
    ```bash
    pip install .
