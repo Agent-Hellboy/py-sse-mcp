@@ -1,12 +1,17 @@
 import asyncio
 import json
+import logging
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
+<<<<<<< Updated upstream
 from .registry import tool_registry
+=======
+from .registry import resource_registry, tool_registry
+>>>>>>> Stashed changes
 
 app = FastAPI()
 
@@ -33,8 +38,8 @@ async def root():
 @app.get("/sse-cursor")
 async def sse_cursor(request: Request):
     session_id = str(uuid4())
-    print("[MCP] SSE => /sse-cursor connected")
-    print(f"[MCP] Created sessionId: {session_id}")
+    logging.debug("[MCP] SSE => /sse-cursor connected")
+    logging.debug(f"[MCP] Created sessionId: {session_id}")
     queue = asyncio.Queue()
     sessions = get_sessions(app)
     sessions[session_id] = {"initialized": False, "queue": queue}
@@ -63,7 +68,7 @@ async def message(request: Request):
             status_code=404, content={"error": "Invalid or missing sessionId"}
         )
     data = await request.json()
-    print(f"[MCP] POST /message => body: {data} query: {session_id}")
+    logging.debug(f"[MCP] POST /message => body: {data} query: {session_id}")
     rpc_id = data.get("id")
     method = data.get("method")
     queue = sessions[session_id]["queue"]
@@ -149,9 +154,9 @@ async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
             "id": rpc_id,
             "result": {"tools": tools_list, "count": len(tools_list)},
         }
-        print(f"[TOOLS] Sending {len(tools_list)} tools to Cursor")
-        print(f"[TOOLS] Tool names: {[t['name'] for t in tools_list]}")
-        print(f"[TOOLS] Tool schemas: {json.dumps(tools_list, indent=2)}")
+        logging.debug(f"[TOOLS] Sending {len(tools_list)} tools to Cursor")
+        logging.debug(f"[TOOLS] Tool names: {[t['name'] for t in tools_list]}")
+        logging.debug(f"[TOOLS] Tool schemas: {json.dumps(tools_list, indent=2)}")
         await queue.put(json.dumps(result))
     elif method == "tools/call":
         tool_name = data.get("params", {}).get("name")
