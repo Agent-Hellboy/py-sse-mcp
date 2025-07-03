@@ -1,6 +1,7 @@
 """
 Utility functions for the MCP framework.
 """
+
 import json
 import logging
 
@@ -80,4 +81,4 @@ async def handle_rpc_method(method, data, session_id, rpc_id, sessions):
             "id": rpc_id,
             "error": {"code": -32601, "message": f"Method '{method}' not recognized"},
         }
-        await queue.put(json.dumps(error)) 
+        await queue.put(json.dumps(error))

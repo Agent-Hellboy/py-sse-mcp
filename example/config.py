@@ -11,10 +11,8 @@ middleware_config = MiddlewareConfig(
         "level": "DEBUG",
         "format": "%(asctime)s %(levelname)s %(message)s",
     },
-    compression={
-        "enabled": True
-    },
+    compression={"enabled": True},
     custom=[
         # Add custom middleware classes here if needed
-    ]
-) 
+    ],
+)

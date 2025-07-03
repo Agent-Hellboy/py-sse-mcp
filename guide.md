@@ -133,7 +133,9 @@ For best practice, create a `config.py` file in your project root to define your
 ### Example: config.py
 
 ```python
-from pymcp.server import MiddlewareConfig
+
+from pymcp.applications import create_app
+from pymcp.middleware import MiddlewareConfig
 
 middleware_config = MiddlewareConfig(
     cors={

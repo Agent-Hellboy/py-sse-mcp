@@ -2,6 +2,7 @@
 App factory for the MCP framework.
 Provides the create_app function to instantiate and configure the FastAPI app.
 """
+
 from typing import Optional
 
 from fastapi import FastAPI
@@ -21,4 +22,4 @@ def create_app(middleware_config: Optional[MiddlewareConfig] = None, **kwargs):
     )
     setup_middleware(app, config)
     app.include_router(router)
-    return app 
+    return app

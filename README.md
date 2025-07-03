@@ -91,7 +91,7 @@ You can now configure middleware for your MCP server using a dedicated `config.p
 ### Example: config.py
 
 ```python
-from pymcp.server import MiddlewareConfig
+from pymcp.middleware import MiddlewareConfig
 
 middleware_config = MiddlewareConfig(
     cors={
@@ -116,8 +116,8 @@ middleware_config = MiddlewareConfig(
 ### Example: run_server.py
 
 ```python
-from example.config import middleware_config
-from pymcp.server import create_app
+from config import middleware_config
+from pymcp.applications import create_app
 
 app = create_app(middleware_config=middleware_config)
 ```

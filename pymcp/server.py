@@ -1,6 +1,7 @@
 """
 Main server logic for the MCP framework.
 """
+
 import asyncio
 import json
 import logging
@@ -14,14 +15,17 @@ from .utils import handle_rpc_method
 
 router = APIRouter()
 
+
 def get_sessions(app):
     if not hasattr(app.state, "sessions"):
         app.state.sessions = {}
     return app.state.sessions
 
+
 @router.get("/")
 async def root():
     return {"status": "ok"}
+
 
 @router.get("/sse-cursor")
 async def sse_cursor(request: Request):
@@ -46,6 +50,7 @@ async def sse_cursor(request: Request):
                 yield "event: heartbeat\ndata: ping\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 
 @router.post("/message")
 async def message(request: Request):

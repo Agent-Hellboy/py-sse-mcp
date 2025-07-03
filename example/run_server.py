@@ -6,6 +6,7 @@ from pymcp.registry import tool_registry
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 @tool_registry.register
 def addNumbersTool(a: float, b: float) -> str:
     """Adds two numbers 'a' and 'b' and returns their sum."""
@@ -41,5 +42,6 @@ def promptEchoTool(prompt: str) -> str:
 
 if __name__ == "__main__":
     import uvicorn
+
     app = create_app(middleware_config=middleware_config)
     uvicorn.run(app, host="0.0.0.0", port=8088)
