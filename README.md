@@ -42,11 +42,35 @@ def my_tool(a: int, b: int) -> str:
 
 ## Hosting the Server with FastAPI and Uvicorn
 
-The framework provides a FastAPI app instance (`pymcp.server.app`). You can use this app to run your server with Uvicorn:
+The framework provides a FastAPI app factory (`pymcp.applications.create_app`). You can use this to create and configure your server, including middleware and compression:
 
 ```python
-from pymcp.server import app
+from pymcp.applications import create_app
 import uvicorn
+
+# Example: Enable GZip compression and add custom middleware
+from fastapi import Request, Response
+
+class CustomHeaderMiddleware:
+    def __init__(self, app):
+        self.app = app
+    async def __call__(self, scope, receive, send):
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                headers = dict(message.get("headers", []))
+                headers[b"x-custom-middleware"] = b"true"
+                message["headers"] = list(headers.items())
+            await send(message)
+        await self.app(scope, receive, send_wrapper)
+
+from pymcp.middleware import MiddlewareConfig
+
+middleware_config = MiddlewareConfig(
+    compression={"enabled": True},
+    custom=[CustomHeaderMiddleware]
+)
+
+app = create_app(middleware_config=middleware_config)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8088)
@@ -54,21 +78,32 @@ if __name__ == "__main__":
 
 ## Configuring Middleware
 
-You can add custom middleware to the FastAPI app provided by the framework. For example, to add a custom middleware:
+To add custom or extra middleware (such as GZip, CORS, or your own), use the `MiddlewareConfig` and pass it to `create_app`:
 
 ```python
-from pymcp.server import app
-from fastapi import Request
+from pymcp.applications import create_app
+from pymcp.middleware import MiddlewareConfig
 
-@app.middleware("http")
-async def custom_middleware(request: Request, call_next):
-    # Custom logic before request
-    response = await call_next(request)
-    # Custom logic after request
-    return response
+# Example: Add your own custom middleware class
+class MyCustomMiddleware:
+    def __init__(self, app):
+        self.app = app
+    async def __call__(self, scope, receive, send):
+        # ... your logic ...
+        await self.app(scope, receive, send)
+
+middleware_config = MiddlewareConfig(
+    compression={"enabled": True},  # Enables GZip
+    custom=[MyCustomMiddleware]
+)
+
+app = create_app(middleware_config=middleware_config)
 ```
 
-You can add this before running the server with Uvicorn as shown above.
+**Note:**  
+- The framework automatically applies CORS and other standard middleware.
+- You can stack as many custom middleware as you like using the `custom` list in `MiddlewareConfig`.
+- For simple per-route logic, you can still use FastAPI's `@app.middleware("http")` decorator after creating the app, but the preferred way is via `MiddlewareConfig` for global middleware.
 
 Request flow of an example mcp server 
 ![mcp](./mcp.png)
@@ -86,45 +121,7 @@ This allows you to control the verbosity and destination of log messages from bo
 
 ## Middleware Configuration
 
-You can now configure middleware for your MCP server using a dedicated `config.py` file and the `MiddlewareConfig` class. This allows you to easily customize CORS, logging, compression, and add your own middleware.
-
-### Example: config.py
-
-```python
-from pymcp.middleware import MiddlewareConfig
-
-middleware_config = MiddlewareConfig(
-    cors={
-        "allow_origins": ["https://myapp.com"],
-        "allow_methods": ["GET", "POST"],
-        "allow_headers": ["*"],
-        "allow_credentials": True,
-    },
-    logging={
-        "level": "DEBUG",
-        "format": "%(asctime)s %(levelname)s %(message)s",
-    },
-    compression={
-        "enabled": True
-    },
-    custom=[
-        # Add custom middleware classes here if needed
-    ]
-)
-```
-
-### Example: run_server.py
-
-```python
-from config import middleware_config
-from pymcp.applications import create_app
-
-app = create_app(middleware_config=middleware_config)
-```
-
-This approach keeps your configuration clean and separated from your application logic.
-
-For more details and advanced configuration options, see [guide.md](./guide.md).
+Check [guide.md](./guide.md).
 
 
 
