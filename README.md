@@ -1,6 +1,6 @@
 # py-sse-mcp
 
-I won't add any new commits , you can use this as an initial setup to implement your own framework.
+**I won't add any new commits , you can use this as an initial setup to implement your own framework.**
 
 [![Build Status](https://github.com/Agent-Hellboy/py-sse-mcp/actions/workflows/python-ci.yml/badge.svg)](https://github.com/Agent-Hellboy/py-sse-mcp/actions/workflows/python-ci.yml)
 [![codecov](https://codecov.io/gh/Agent-Hellboy/py-sse-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/Agent-Hellboy/py-sse-mcp)
