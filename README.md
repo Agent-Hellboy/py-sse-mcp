@@ -1,6 +1,6 @@
 # py-sse-mcp
 
-**I won't add any new commits except for initial prompts and resource, you can use this as an initial setup to implement your own framework. I am not achiving it as i will add an initial commits fpr resource and prompts**
+**I won't add any new commits except for initial prompts and resource, you can use this as an initial setup to implement your own framework. I am not achiving it as i will add an initial commits for resource and prompts**
 
 [![Build Status](https://github.com/Agent-Hellboy/py-sse-mcp/actions/workflows/python-ci.yml/badge.svg)](https://github.com/Agent-Hellboy/py-sse-mcp/actions/workflows/python-ci.yml)
 [![codecov](https://codecov.io/gh/Agent-Hellboy/py-sse-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/Agent-Hellboy/py-sse-mcp)
